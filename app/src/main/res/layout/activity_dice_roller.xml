@@ -18,25 +18,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:id="@+id/tblRollRow1">
             <EditText
-                    android:layout_width="wrap_content"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:inputType="textPersonName"
-                    android:text="Bonus"
+                    android:hint="Dice Modifier"
+                    android:inputType="number"
                     android:ems="10"
-                    android:id="@+id/inpBonus" android:layout_weight="1"/>
+                    android:id="@+id/edtModifier" android:layout_weight="1" tools:text="Modifier"/>
             <Button
                     android:text="Roll!"
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/btnRoll"
-                    tools:layout_editor_absoluteY="56dp" tools:layout_editor_absoluteX="37dp"/>
+                    tools:layout_editor_absoluteY="56dp" tools:layout_editor_absoluteX="37dp"
+                    android:layout_width="120dp"/>
             <TextView
                     android:layout_height="wrap_content"
                     android:id="@+id/txtRollResult"
-                    android:textSize="24sp" android:textStyle="bold"
-                    android:text="Click to roll!" tools:layout_editor_absoluteY="56dp"
+                    android:textSize="18sp" android:textStyle="bold"
+                    tools:layout_editor_absoluteY="56dp"
                     tools:layout_editor_absoluteX="165dp"
-                    android:visibility="visible" android:layout_width="wrap_content"/>
+                    android:visibility="visible" android:layout_width="140dp" android:text=" "/>
         </LinearLayout>
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
