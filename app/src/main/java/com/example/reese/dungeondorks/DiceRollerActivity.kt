@@ -25,8 +25,7 @@ class DiceRollerActivity : AppCompatActivity() {
     private fun rollDice(bound: kotlin.Int) {
 
         val txt = findViewById<TextView>(R.id.txtRollResult)
-        val bonus = findViewById<EditText>(R.id.edtModifier).text
-
+        val mod = findViewById<EditText>(R.id.edtModifier).text.toString()
         val diceResult = Random().nextInt(bound) + 1
 
         when {
@@ -34,7 +33,7 @@ class DiceRollerActivity : AppCompatActivity() {
             diceResult <= 1 -> txt.setTextColor(Color.RED)
             else -> txt.setTextColor(Color.BLACK)
         }
-        val strResult = "Rolled a " + ( diceResult + bonus.toString().toInt() )
+        val strResult = "Rolled a " + ( diceResult + if(mod.isNullOrEmpty()) 0 else mod.toInt() )
 
         txt.text = strResult
     }

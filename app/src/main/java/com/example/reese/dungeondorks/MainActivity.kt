@@ -14,10 +14,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val btn = findViewById<Button>(R.id.btnDiceRoller)
+        val btnDice = findViewById<Button>(R.id.btnDiceRoller)
+        val btnSpellBook = findViewById<Button>(R.id.btnSpellBook)
 
-        btn.setOnClickListener {
+        btnDice.setOnClickListener {
             val intent = Intent(this, DiceRollerActivity::class.java)
+            startActivity(intent)
+        }
+        btnSpellBook.setOnClickListener {
+            val intent = Intent(this, SpellBook::class.java)
             startActivity(intent)
         }
     }
