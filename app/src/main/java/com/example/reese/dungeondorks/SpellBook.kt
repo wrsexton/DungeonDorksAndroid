@@ -13,7 +13,7 @@ import retrofit2.Response
 
 
 interface SpellService {
-    @GET("spells/2")
+    @GET("3")
     fun listSpell(): Call<Spell>
 }
 
@@ -27,7 +27,7 @@ class SpellBook : AppCompatActivity() {
 
         val retrofit = Retrofit.Builder()
             .client(client)
-            .baseUrl("http://dnd5eapi.co/api/")
+            .baseUrl("http://dnd5eapi.co/api/spells/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -39,17 +39,20 @@ class SpellBook : AppCompatActivity() {
             override fun onFailure(call: Call<Spell>, t: Throwable) {
                 val txt = findViewById<TextView>(R.id.txtTest)
                 txt.text = "$t"
-                //"not implemented") //To change body of created functions use File | Settings | File Templates.
             }
 
             override fun onResponse(call: Call<Spell>, response: Response<Spell>) {
                 val txt = findViewById<TextView>(R.id.txtTest)
-                val s = response.body()
-                if(s != null) {
-                    txt.text = s.name
+                if(response.isSuccessful) {
+                    val s = response.body()
+                    if (s != null) {
+                        txt.text = s.name
+                    } else {
+                        txt.text = "NULL ERR"
+                    }
+                } else {
+                    txt.text = response.errorBody().toString()
                 }
-                // handle response here
-                //val spellResp = response.body()
             }
         })
 
