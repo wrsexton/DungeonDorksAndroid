@@ -2,6 +2,9 @@ package com.example.reese.dungeondorks
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.EditText
 import android.widget.TextView
 import retrofit2.Call
 import retrofit2.http.GET
@@ -13,48 +16,72 @@ import retrofit2.Response
 
 
 interface SpellService {
-    @GET("3")
-    fun listSpell(): Call<Spell>
+    @GET("spells/")
+    fun listSpellAllSpells(): Call<Spells>
 }
 
 class SpellBook : AppCompatActivity() {
+
+    lateinit var spellsList: Array<Spell>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_spell_book)
 
-        val client = OkHttpClient()
+        initSpellsList()
 
+        val editSpellSearch = findViewById<EditText>(R.id.editSpellSearch)
+        editSpellSearch.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                //TODO("not implemented")
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                getAllSpells(s.toString())
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                //TODO("not implemented")
+            }
+        })
+    }
+
+    fun initSpellsList() {
+        // Retrofit boilerplate setup
+        val client = OkHttpClient()
         val retrofit = Retrofit.Builder()
             .client(client)
-            .baseUrl("http://dnd5eapi.co/api/spells/")
+            .baseUrl("http://dnd5eapi.co/api/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-
         val service = retrofit.create(SpellService::class.java)
+        val call = service.listSpellAllSpells()
 
-        val call = service.listSpell()
-
-        call.enqueue(object : Callback<Spell> {
-            override fun onFailure(call: Call<Spell>, t: Throwable) {
+        // Retrofit request call
+        call.enqueue(object : Callback<Spells> {
+            override fun onFailure(call: Call<Spells>, t: Throwable) {
                 val txt = findViewById<TextView>(R.id.txtTest)
                 txt.text = "$t"
             }
 
-            override fun onResponse(call: Call<Spell>, response: Response<Spell>) {
-                val txt = findViewById<TextView>(R.id.txtTest)
+            override fun onResponse(call: Call<Spells>, response: Response<Spells>) {
                 if(response.isSuccessful) {
                     val s = response.body()
                     if (s != null) {
-                        txt.text = s.name
+                        spellsList = s.results
                     } else {
-                        txt.text = "NULL ERR"
+                        //txt.text = "NULL ERR"
                     }
                 } else {
-                    txt.text = response.errorBody().toString()
+                    //txt.text = response.errorBody().toString()
                 }
             }
         })
+    }
 
+    fun getAllSpells(search : String) {
+        val searchAsInt = search.toIntOrNull() ?: return
+        val txt = findViewById<TextView>(R.id.txtTest)
+        txt.text = spellsList[searchAsInt].name
     }
 }
