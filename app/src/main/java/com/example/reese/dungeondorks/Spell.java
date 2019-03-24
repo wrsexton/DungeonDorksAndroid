@@ -20,4 +20,9 @@ public class Spell {
         Spell spellResponse = gson.fromJson(response, Spell.class);
         return spellResponse;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
