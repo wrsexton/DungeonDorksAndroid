@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.WindowManager
 import android.widget.EditText
 import android.widget.TextView
 import retrofit2.Call
@@ -25,7 +26,6 @@ interface SpellService {
 class SpellBook : AppCompatActivity() {
 
     private lateinit var spellsList: List<Spell>
-    private lateinit var spellsListDisplayed: MutableList<Spell>
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: SpellbookRecyclerAdapter
@@ -34,6 +34,8 @@ class SpellBook : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_spell_book)
+
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING) //SOFT_INPUT_ADJUST_PAN);
 
         // Grab all spells from API
         initSpellsList()
@@ -54,7 +56,6 @@ class SpellBook : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 //val txt = findViewById<TextView>(R.id.txtTest)
                 getFilteredSpells(s.toString())
-
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -64,10 +65,8 @@ class SpellBook : AppCompatActivity() {
     }
 
     private fun initRecyclerView() {
-        spellsListDisplayed = mutableListOf()
-
         viewManager = LinearLayoutManager(this)
-        viewAdapter = SpellbookRecyclerAdapter(spellsListDisplayed)
+        viewAdapter = SpellbookRecyclerAdapter(mutableListOf())
 
         recyclerView = findViewById<RecyclerView>(R.id.lstSpells).apply {
             // use this setting to improve performance if you know that changes
@@ -97,8 +96,8 @@ class SpellBook : AppCompatActivity() {
         // Retrofit request call
         call.enqueue(object : Callback<Spells> {
             override fun onFailure(call: Call<Spells>, t: Throwable) {
-                val txt = findViewById<TextView>(R.id.txtTest)
-                txt.text = "$t"
+//                val txt = findViewById<TextView>(R.id.txtTest)
+//                txt.text = "$t"
             }
 
             override fun onResponse(call: Call<Spells>, response: Response<Spells>) {
@@ -117,19 +116,12 @@ class SpellBook : AppCompatActivity() {
     }
 
     fun getFilteredSpells(search : String) {
-        spellsListDisplayed.clear()
         if(search.isNullOrEmpty()) {
+            viewAdapter.setData(mutableListOf())
             return
         }
-        //val txt = findViewById<TextView>(R.id.txtTest)
-        //txt.text = getSpellsByName(search).toString()
-//        getSpellsByName(search).forEach {
-//            spellsListDisplayed.add(it)
-//        }
-        viewAdapter.setData(getSpellsByName(search))
 
-        //var strSpells = spells.toString()
-        //return spells
+        viewAdapter.setData(getSpellsByName(search))
     }
 
     fun getSpellsByName(search : String) : MutableList<Spell> {
