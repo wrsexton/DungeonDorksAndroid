@@ -15,8 +15,10 @@ class DiceRollerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dice_roller)
 
+        // Grab roll button
         val btn = findViewById<Button>(R.id.btnRoll)
 
+        // Set the button up to roll a d20!
         btn.setOnClickListener {
             rollDice(Integer.valueOf(20))
         }
@@ -24,17 +26,20 @@ class DiceRollerActivity : AppCompatActivity() {
 
     private fun rollDice(bound: kotlin.Int) {
 
+        // Grab the results box, the modifier input, and roll the die!
         val txt = findViewById<TextView>(R.id.txtRollResult)
         val mod = findViewById<EditText>(R.id.edtModifier).text.toString()
         val diceResult = Random().nextInt(bound) + 1
 
+        // Green on critical success, red on critical failure, black otherwise
         when {
             diceResult >= 20 -> txt.setTextColor(Color.GREEN)
             diceResult <= 1 -> txt.setTextColor(Color.RED)
             else -> txt.setTextColor(Color.BLACK)
         }
-        val strResult = "Rolled a " + ( diceResult + if(mod.isNullOrEmpty()) 0 else mod.toInt() )
 
+        // Display the result!
+        val strResult = "Rolled a " + ( diceResult + if(mod.isNullOrEmpty()) 0 else mod.toInt() )
         txt.text = strResult
     }
 }

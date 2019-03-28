@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.view.WindowManager
 import android.widget.EditText
 import android.widget.TextView
@@ -17,7 +18,7 @@ import okhttp3.OkHttpClient
 import retrofit2.Callback
 import retrofit2.Response
 
-
+// Interface for API calls to spells from 5e API
 interface SpellService {
     @GET("spells/")
     fun listSpellAllSpells(): Call<Spells>
@@ -25,17 +26,24 @@ interface SpellService {
 
 class SpellBook : AppCompatActivity() {
 
+    // Full list of all spells
     private lateinit var spellsList: List<Spell>
-
+    // Recycler View List of spells for user to search through
     private lateinit var recyclerView: RecyclerView
+    // Adapter for Recycler View
     private lateinit var viewAdapter: SpellbookRecyclerAdapter
+    // Layout Manager for Recycler View
     private lateinit var viewManager: RecyclerView.LayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_spell_book)
 
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING) //SOFT_INPUT_ADJUST_PAN);
+        // Used for preventing the keyboard from displacing the list of spells on the screen
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
+
+        // failsafe init to avoid crash
+        spellsList = listOf()
 
         // Grab all spells from API
         initSpellsList()
@@ -47,20 +55,16 @@ class SpellBook : AppCompatActivity() {
     }
 
     private fun initSearchFunctionality() {
+        // Grab search input field and set link its onTextChanged event to get spells filtered by input text.
         val editSpellSearch = findViewById<EditText>(R.id.editSpellSearch)
         editSpellSearch.addTextChangedListener(object: TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                //TODO("not implemented")
-            }
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                //val txt = findViewById<TextView>(R.id.txtTest)
                 getFilteredSpells(s.toString())
             }
 
-            override fun afterTextChanged(s: Editable?) {
-                //TODO("not implemented")
-            }
+            // Unused
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
         })
     }
 
@@ -84,32 +88,42 @@ class SpellBook : AppCompatActivity() {
 
     private fun initSpellsList() {
         // Retrofit boilerplate setup
+        val apiBaseURL = "http://dnd5eapi.co/api/"
         val client = OkHttpClient()
         val retrofit = Retrofit.Builder()
             .client(client)
-            .baseUrl("http://dnd5eapi.co/api/")
+            .baseUrl(apiBaseURL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         val service = retrofit.create(SpellService::class.java)
         val call = service.listSpellAllSpells()
 
-        // Retrofit request call
+        val editSpellSearch = findViewById<EditText>(R.id.editSpellSearch)
+        val infoText = findViewById<TextView>(R.id.txtInfo)
+        infoText.visibility = View.VISIBLE
+        infoText.text = "Waiting on response from http://dnd5eapi.co/api/..."
+        editSpellSearch.isEnabled = false
+
+        // Retrofit request API call
         call.enqueue(object : Callback<Spells> {
             override fun onFailure(call: Call<Spells>, t: Throwable) {
-//                val txt = findViewById<TextView>(R.id.txtTest)
-//                txt.text = "$t"
+                infoText.text = t.toString()
             }
 
             override fun onResponse(call: Call<Spells>, response: Response<Spells>) {
                 if(response.isSuccessful) {
                     val s = response.body()
                     if (s != null) {
+                        infoText.visibility = View.INVISIBLE
+                        editSpellSearch.isEnabled = true
                         spellsList = s.results.toList()
                     } else {
-                        //txt.text = "NULL ERR"
+                        infoText.visibility = View.VISIBLE
+                        infoText.text = response.errorBody().toString()
                     }
                 } else {
-                    //txt.text = response.errorBody().toString()
+                    infoText.visibility = View.VISIBLE
+                    infoText.text = response.errorBody().toString()
                 }
             }
         })
@@ -120,13 +134,11 @@ class SpellBook : AppCompatActivity() {
             viewAdapter.setData(mutableListOf())
             return
         }
-
         viewAdapter.setData(getSpellsByName(search))
     }
 
     fun getSpellsByName(search : String) : MutableList<Spell> {
         var spells = mutableListOf<Spell>()
-
         for(s in spellsList) if(s.name.contains(search,true)) spells.add(s)
         return spells
     }
